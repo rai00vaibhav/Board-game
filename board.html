@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Board</title>
+	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+	<style type="text/css">
+		.game-container{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+        }
+        .board{
+			width: 50%;
+		}
+		.row{
+			display: flex;
+            height: 60px;
+            justify-content: space-between;
+		}
+		.column{
+			border: 1px solid #000;
+			height: 100%;
+			width: 100%;
+		}
+        .player-status{
+            display: flex;
+            border: 1px solid;
+            flex-direction: column;
+            justify-content: space-between;
+            border:1px solid;
+            width:30%
+        }
+        .player-status > div{
+            height: 33%;
+        }
+	</style>
+</head>
+<body ng-app="myApp" ng-controller="myCtrl">
+    <div class="game-container">
+        <div class="board">
+            <div ng-repeat="(index1,line1) in board.row" class="row">
+                <div ng-repeat="(index2,line2) in board.column" class="column">
+                    ({{index1}},{{index2}})
+                    <div ng-if="(playerPostion.A.x == index1) && (playerPostion.A.y == index2)">
+                        A
+                    </div>
+                    <div ng-if="(playerPostion.B.x == index1) && (playerPostion.B.y == index2)">
+                        B
+                    </div>
+                    <div ng-if="(index1 == 3) && (index2 == 1)">
+                        T
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="player-status">
+            <div class="player-control">
+                <div>
+                    Turn: <span ng-if="playerPostion.A.active">Player A</span>
+                    <span ng-if="playerPostion.B.active">Player B</span>
+                </div>
+                <div>
+                    <button ng-click="generateRandomNumber()"> Play</button>
+                </div>
+                <div>
+                    <button ng-click="movePlayer('left')"> Left</button>
+                    <button ng-click="movePlayer('right')"> Right</button>
+                    <button ng-click="movePlayer('up')"> Up </button>
+                    <button ng-click="movePlayer('down')"> Down</button>
+                </div>
+            </div>
+            <div class="score-board">
+                <div>Score</div>
+                <div>Player A: {{playerPostion.A.score}}</div>
+                <div>Player B: {{playerPostion.B.score}}</div>
+            </div>
+            <div class="dial-num">
+                Number : {{generatedNumber}}
+            </div>
+        </div>
+    </div>
+<script>
+	var app = angular.module('myApp',[]);
+		app.controller('myCtrl',function ($scope) {
+			var ref = $scope;
+			ref.board = {
+				row : [0,1,2,3,4,5,6,7,8,9],
+				column : [0,1,2,3,4,5,6,7,8,9]
+			}
+            
+            ref.generatedNumber = -1;
+            ref.playerPostion = {
+                A:{
+                    x:0,
+                    y:9,
+                    score : 0,
+                    active:false
+                },
+                B:{
+                    x:4,
+                    y:2,
+                    score : 0,
+                    active : true
+                }
+            }
+            ref.generateRandomNumber = function(){
+                ref.generatedNumber = Math.floor(Math.random() * (5 - 1)) + 1;
+            }
+            var whoIsActive = function(){
+                if( ref.playerPostion.A.active){
+                    return ref.playerPostion.A
+                }
+                else{
+                    return ref.playerPostion.B
+                }
+            }
+            var moveHorizon = function(player,direction){
+                if(direction == 'left'){
+                    for(let i=ref.generatedNumber; i>0;i--){
+                        player.y =  player.y-1;
+                    }
+                }
+                else{
+                    for(let i=ref.generatedNumber; i>0;i--){
+                        player.y =  player.y+1;
+                    }
+                }
+            }
+            var moveVerticle = function(player,direction){
+                if(direction == 'up'){
+                    for(let i=ref.generatedNumber; i>0;i--){
+                        player.x =  player.x-1;
+                    }
+                }
+                else{
+                    for(let i=ref.generatedNumber; i>0;i--){
+                        player.x =  player.x+1;
+                    }
+                }
+            }
+            var updateScore = function(player){
+                player.score = player.score + Math.abs(3 - player.x) + Math.abs(1 - player.y)
+            }
+            ref.movePlayer = function(direction){
+                let player = whoIsActive();
+                switch (direction) {
+                    case 'left':
+                        moveHorizon(player,'left');
+                        break;
+                    case 'right':
+                        moveHorizon(player,'right');
+                        break;
+                    case 'up':
+                        moveVerticle(player,'up');
+                        break;
+                    case 'down':
+                        moveVerticle(player,'down');
+                        break;    
+                }
+                updateScore(player);
+                ref.playerPostion.A.active =  !ref.playerPostion.A.active;
+                ref.playerPostion.B.active =  !ref.playerPostion.B.active;
+                ref.generatedNumber = -1;
+            }
+		});
+</script>
+</body>
+</html>
